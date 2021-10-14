@@ -1,0 +1,70 @@
+# Harmony mainnet node
+
+version: "3.4"
+services:
+  harmony:
+    build:
+      context: ./node
+    image: harmony:local
+    volumes:
+      - harmony-data:/var/lib/harmony
+      - ./logs:/logs
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 9000:9000/tcp
+      - 6000:6000/tcp
+    entrypoint: [ "/bin/sh", "-c" ]
+    command:
+      - |
+        if [ ! -f /var/lib/harmony/setupdone ]
+        then
+          echo "Getting snapshot for shard 0"
+          rclone -P -L sync release:pub.harmony.one/mainnet.min/harmony_db_0 harmony_db_0
+          if [ $$? -ne 0 ]; then
+            echo "Snapshot fetch failed, please try again"
+            exit 1
+          fi
+          if [ ${SHARD} != "0" ]; then
+            echo "Getting snapshot for shard ${SHARD}"
+            rclone -P -L sync release:pub.harmony.one/mainnet.min/harmony_db_${SHARD} harmony_db_${SHARD}
+            if [ $$? -ne 0 ]; then
+              echo "Snapshot fetch failed, please try again"
+              exit 1
+            fi
+          fi
+          touch /var/lib/harmony/setupdone
+        fi
+        exec harmony \
+        --datadir /var/lib/harmony \
+        --bls.dir /var/lib/harmony/blskeys \
+        --log.dir /logs \
+        --http \
+        --http.ip 0.0.0.0 \
+        --ws \
+        --ws.ip 0.0.0.0
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.ec.service=ec
+      - traefik.http.routers.ec.entrypoints=websecure
+      - traefik.http.routers.ec.rule=Host(`${EC_HOST}.${DOMAIN}`)
+      - traefik.http.routers.eclb.service=ec
+      - traefik.http.routers.eclb.entrypoints=websecure
+      - traefik.http.routers.eclb.rule=Host(`${EC_LB}.${DOMAIN}`)
+      - traefik.http.services.ec.loadbalancer.server.port=${EC_RPC_PORT}
+      - traefik.http.routers.ecws.service=ecws
+      - traefik.http.routers.ecws.entrypoints=websecure
+      - traefik.http.routers.ecws.rule=Host(`${EC_WS_HOST}.${DOMAIN}`)
+      - traefik.http.routers.ecwslb.service=ecws
+      - traefik.http.routers.ecwslb.entrypoints=websecure
+      - traefik.http.routers.ecwslb.rule=Host(`${EC_WS_LB}.${DOMAIN}`)
+      - traefik.http.services.ecws.loadbalancer.server.port=${EC_WS_PORT}
+  cli:
+    build:
+      context: ./cli
+    image: harmony-cli:local
+    volumes:
+      - harmony-data:/var/lib/harmony
+
+volumes:
+  harmony-data:
