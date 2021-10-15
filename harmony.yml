@@ -1,6 +1,12 @@
 # Harmony mainnet node
-
 version: "3.4"
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 20m
+      max-file: "3"
+
 services:
   harmony:
     build:
@@ -14,6 +20,7 @@ services:
     ports:
       - 9000:9000/tcp
       - 6000:6000/tcp
+    <<: *logging
     entrypoint: [ "/bin/sh", "-c" ]
     command:
       - |
