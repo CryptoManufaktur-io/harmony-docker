@@ -71,7 +71,7 @@ services:
     build:
       context: ./cli
     image: harmony-cli:local
-    restart: no
+    restart: "no"
     volumes:
       - harmony-data:/var/lib/harmony
 
