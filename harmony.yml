@@ -53,20 +53,24 @@ services:
         --ws.ip 0.0.0.0
     labels:
       - traefik.enable=true
-      - traefik.http.routers.ec.service=ec
-      - traefik.http.routers.ec.entrypoints=websecure
-      - traefik.http.routers.ec.rule=Host(`${EC_HOST}.${DOMAIN}`)
-      - traefik.http.routers.eclb.service=ec
-      - traefik.http.routers.eclb.entrypoints=websecure
-      - traefik.http.routers.eclb.rule=Host(`${EC_LB}.${DOMAIN}`)
-      - traefik.http.services.ec.loadbalancer.server.port=${EC_RPC_PORT}
-      - traefik.http.routers.ecws.service=ecws
-      - traefik.http.routers.ecws.entrypoints=websecure
-      - traefik.http.routers.ecws.rule=Host(`${EC_WS_HOST}.${DOMAIN}`)
-      - traefik.http.routers.ecwslb.service=ecws
-      - traefik.http.routers.ecwslb.entrypoints=websecure
-      - traefik.http.routers.ecwslb.rule=Host(`${EC_WS_LB}.${DOMAIN}`)
-      - traefik.http.services.ecws.loadbalancer.server.port=${EC_WS_PORT}
+      - traefik.http.routers.harmony.service=harmony
+      - traefik.http.routers.harmony.entrypoints=websecure
+      - traefik.http.routers.harmony.rule=Host(`${EC_HOST}.${DOMAIN}`)
+      - traefik.http.routers.harmony.tls.certresolver=letsencrypt
+      - traefik.http.routers.harmonylb.service=harmony
+      - traefik.http.routers.harmonylb.entrypoints=websecure
+      - traefik.http.routers.harmonylb.rule=Host(`${EC_LB}.${DOMAIN}`)
+      - traefik.http.routers.harmonylb.tls.certresolver=letsencrypt
+      - traefik.http.services.harmony.loadbalancer.server.port=${EC_RPC_PORT}
+      - traefik.http.routers.harmonyws.service=harmonyws
+      - traefik.http.routers.harmonyws.entrypoints=websecure
+      - traefik.http.routers.harmonyws.rule=Host(`${EC_WS_HOST}.${DOMAIN}`)
+      - traefik.http.routers.harmonyws.tls.certresolver=letsencrypt
+      - traefik.http.routers.harmonywslb.service=harmonyws
+      - traefik.http.routers.harmonywslb.entrypoints=websecure
+      - traefik.http.routers.harmonywslb.rule=Host(`${EC_WS_LB}.${DOMAIN}`)
+      - traefik.http.routers.harmonywslb.tls.certresolver=letsencrypt
+      - traefik.http.services.harmonyws.loadbalancer.server.port=${EC_WS_PORT}
   cli:
     build:
       context: ./cli
